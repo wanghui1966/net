@@ -6,6 +6,7 @@ void server_func(int fd)
 
 	while (true)
 	{
+		fflush(stdout);
 		memset(buf, 0, MAX_BUF_LEN);
 		ssize_t len = read(fd, buf, MAX_BUF_LEN);
 		if (len > 0)

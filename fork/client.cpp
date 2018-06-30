@@ -15,6 +15,7 @@ void client_func(int fd)
 	while (true)
 	{
 		sleep(3);
+		fflush(stdout);
 
 		memset(send_buf, 0, MAX_BUF_LEN);
 		snprintf(send_buf, MAX_BUF_LEN, "hello server(ip=%s, port=%d, pid=%d, index=%d).", client_ip, client_port, getpid(), index++);
