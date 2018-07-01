@@ -1,5 +1,21 @@
 #include "header.h"
 
+void sig_chld(int signo)
+{
+	while (true)
+	{
+		int stat = 0;
+		pid_t pid = waitpid(-1, &stat, WNOHANG);
+		if (pid > 0)
+		{
+			printf("fork_client(pid=%d) terminated.\n", pid);
+			fflush(stdout);
+			continue;
+		}
+		break;
+	}
+}
+
 void server_func(int fd)
 {
 	char buf[MAX_BUF_LEN] = {0};
@@ -58,13 +74,28 @@ int main()
 		printf("listen error.\n");
 		return -1;
 	}
+
+	signal(SIGCHLD, sig_chld);
 	
 	while (true)
 	{
 		struct sockaddr_in client_addr;
 		socklen_t client_addr_len = sizeof(client_addr);
 		int connect_fd = accept(listen_fd, (struct sockaddr*)&client_addr, &client_addr_len);
+		if (connect_fd < 0)
+		{
+			if (errno == EINTR)
+			{
+				continue;
+			}
+			else
+			{
+				printf("accept error.\n");
+				return -1;
+			}
+		}
 		printf("accept:fd=%d.\n", connect_fd);
+		fflush(stdout);
 
 		pid_t child_pid = fork();
 		if (child_pid == 0)
