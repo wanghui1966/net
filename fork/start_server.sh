@@ -1,6 +1,6 @@
 #!/bin/sh
 
-rm fork_server.log
+rm -rf log/fork_server.log
 ulimit -c unlimited
 ulimit -n 4096
-nohup ./fork_server > fork_server.log 2>&1 &
+nohup ./bin/fork_server > log/fork_server.log 2>&1 &

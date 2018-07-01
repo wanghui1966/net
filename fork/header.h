@@ -10,7 +10,8 @@
 
 const char *SERVER_IP = "127.0.0.1";
 const short SERVER_PORT = 6666;
+
 const int BACKLOG = 5;
-const int MAX_BUF_LEN = 1024;
+const int MAX_BUF_LEN = 1024;		// buf长度
 
 extern int errno;
