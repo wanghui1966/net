@@ -3,3 +3,8 @@
 fork/log/*log
 fork/bin/fork_server
 fork/bin/fork_client
+
+# select
+select/log/*log
+select/bin/select_server
+select/bin/select_client
