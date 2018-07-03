@@ -1,4 +1,4 @@
-#include "header.h"
+#include "../common/header.h"
 
 void sig_chld(int signo)
 {
@@ -22,7 +22,6 @@ void server_func(int fd)
 
 	while (true)
 	{
-		fflush(stdout);
 		memset(buf, 0, MAX_BUF_LEN);
 		ssize_t len = read(fd, buf, MAX_BUF_LEN);
 		if (len > 0)
@@ -33,14 +32,17 @@ void server_func(int fd)
 			snprintf(buf, MAX_BUF_LEN, "hello client.");
 			write(fd, buf, strlen(buf));
 			printf("send:: %s\n", buf);
+			fflush(stdout);
 			continue;
 		}
 		else if (len < 0 && errno == EINTR)
 		{
 			printf("recv error:: continue\n");
+			fflush(stdout);
 			continue;
 		}
 		printf("recv error:: quit\n");
+		fflush(stdout);
 		break;
 	}
 }
@@ -111,6 +113,7 @@ int main()
 		else
 		{
 			printf("fork error.\n");
+			fflush(stdout);
 			close(connect_fd);
 		}
 	}

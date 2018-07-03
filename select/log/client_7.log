@@ -1,0 +1,26 @@
+send:: hello server(ip=127.0.0.1, port=25484, pid=18539, index=0).
+recv:: hello client.
+send:: hello server(ip=127.0.0.1, port=25484, pid=18539, index=1).
+recv:: hello client.
+send:: hello server(ip=127.0.0.1, port=25484, pid=18539, index=2).
+recv:: hello client.
+send:: hello server(ip=127.0.0.1, port=25484, pid=18539, index=3).
+recv:: hello client.
+send:: hello server(ip=127.0.0.1, port=25484, pid=18539, index=4).
+recv:: hello client.
+send:: hello server(ip=127.0.0.1, port=25484, pid=18539, index=5).
+recv:: hello client.
+send:: hello server(ip=127.0.0.1, port=25484, pid=18539, index=6).
+recv:: hello client.
+send:: hello server(ip=127.0.0.1, port=25484, pid=18539, index=7).
+recv:: hello client.
+send:: hello server(ip=127.0.0.1, port=25484, pid=18539, index=8).
+recv:: hello client.
+send:: hello server(ip=127.0.0.1, port=25484, pid=18539, index=9).
+recv:: hello client.
+send:: hello server(ip=127.0.0.1, port=25484, pid=18539, index=10).
+recv:: hello client.
+send:: hello server(ip=127.0.0.1, port=25484, pid=18539, index=11).
+recv:: hello client.
+send:: hello server(ip=127.0.0.1, port=25484, pid=18539, index=12).
+recv:: hello client.
