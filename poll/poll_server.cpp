@@ -30,25 +30,22 @@ int main()
 		return -1;
 	}
 
-	int client_fd[SELECT_FD_SET_SIZE] = {0};
-	for (int i = 0; i < SELECT_FD_SET_SIZE; ++i)
+	struct pollfd client_fd[OPEN_MAX];
+	client_fd[0].fd = listen_fd;
+	client_fd[0].events = POLLIN;
+	for (int i = 1; i < OPEN_MAX; ++i)
 	{
-		client_fd[i] = -1;
+		client_fd[i].fd = -1;
 	}
-	fd_set all_set;
-	FD_ZERO(&all_set);
-	FD_SET(listen_fd, &all_set);
-	int max_fd = listen_fd;		// 待测试的最大描述符
-	int max_read_fd_index = -1;	// 最大的可读描述符索引
+	int max_read_fd_index = 0;	// 最大的可读描述符索引
 	char buf[MAX_BUF_LEN] = {0};
 
 	while (true)
 	{
-		fd_set rset = all_set;
-		int ready_fd = select(max_fd + 1, &rset, nullptr, nullptr, nullptr);
+		int ready_fd = poll(client_fd, max_read_fd_index + 1, -1);
 
 		// 监听套接字消息
-		if (FD_ISSET(listen_fd, &rset))
+		if (client_fd[0].revents & POLLIN)
 		{
 			struct sockaddr_in client_addr;
 			socklen_t client_addr_len = sizeof(client_addr);
@@ -72,11 +69,12 @@ int main()
 				fflush(stdout);
 
 				int i = 0;
-				for (; i < SELECT_FD_SET_SIZE; ++i)
+				for (; i < OPEN_MAX; ++i)
 				{
-					if (client_fd[i] == -1)
+					if (client_fd[i].fd == -1)
 					{
-						client_fd[i] = connect_fd;
+						client_fd[i].fd = connect_fd;
+						client_fd[i].events = POLLIN;
 						break;
 					}
 				}
@@ -88,11 +86,6 @@ int main()
 				}
 				else
 				{
-					FD_SET(connect_fd, &all_set);
-					if (connect_fd > max_fd)
-					{
-						max_fd = connect_fd;
-					}
 					if (i > max_read_fd_index)
 					{
 						max_read_fd_index = i;
@@ -108,21 +101,21 @@ int main()
 		// 可读套接字消息
 		for (int i = 0; i <= max_read_fd_index; ++i)
 		{
-			if (client_fd[i] < 0)
+			if (client_fd[i].fd < 0)
 			{
 				continue;
 			}
-			if (FD_ISSET(client_fd[i], &rset))
+			if (client_fd[i].revents & (POLLIN | POLLERR))
 			{
 				memset(buf, 0, MAX_BUF_LEN);
-				ssize_t len = read(client_fd[i], buf, MAX_BUF_LEN);
+				ssize_t len = read(client_fd[i].fd, buf, MAX_BUF_LEN);
 				if (len > 0)
 				{
 					printf("recv:: %s\n", buf);
 
 					memset(buf, 0, MAX_BUF_LEN);
 					snprintf(buf, MAX_BUF_LEN, "hello client.");
-					write(client_fd[i], buf, strlen(buf));
+					write(client_fd[i].fd, buf, strlen(buf));
 				}
 				else if (len < 0 && errno == EINTR)
 				{
@@ -130,10 +123,9 @@ int main()
 				}
 				else
 				{
-					close(client_fd[i]);
-					FD_CLR(client_fd[i], &all_set);
-					printf("connection closed:fd=%d\n", client_fd[i]);
-					client_fd[i] = -1;
+					close(client_fd[i].fd);
+					printf("connection closed:fd=%d\n", client_fd[i].fd);
+					client_fd[i].fd = -1;
 				}
 				fflush(stdout);
 			}

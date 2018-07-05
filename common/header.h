@@ -10,6 +10,9 @@
 #include <sys/select.h>
 #include <sys/time.h>
 
+// poll
+#include <poll.h>
+
 #include <string.h>
 #include <stdio.h>
 
@@ -20,5 +23,7 @@ const int BACKLOG = 5;
 const int MAX_BUF_LEN = 1024;		// buf长度
 
 const int SELECT_FD_SET_SIZE = 128;	// select轮询套接字数量
+
+const int OPEN_MAX = 1024;			// poll打开描述符数量
 
 extern int errno;

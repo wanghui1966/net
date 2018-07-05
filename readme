@@ -9,3 +9,9 @@
 
 # 1. 并发服务器，为每个客户请求fork一个进程
 fork目录下，为每一个客户端请求fork一个进程单独处理
+
+# 2. select
+select目录下
+
+# 3. poll
+poll目录下

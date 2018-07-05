@@ -8,3 +8,8 @@ fork/bin/fork_client
 select/log/*log
 select/bin/select_server
 select/bin/select_client
+
+# poll
+poll/log/*log
+poll/bin/poll_server
+poll/bin/poll_client
