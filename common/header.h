@@ -4,6 +4,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <errno.h>
+
+// fork
 #include <unistd.h>
 
 // select
@@ -13,11 +15,14 @@
 // poll
 #include <poll.h>
 
+// thread
+#include <thread>
+
 #include <string.h>
 #include <stdio.h>
 
 const char *SERVER_IP = "127.0.0.1";
-const short SERVER_PORT = 6666;
+const in_port_t SERVER_PORT = 6666;
 
 const int BACKLOG = 5;
 const int MAX_BUF_LEN = 1024;		// buf长度

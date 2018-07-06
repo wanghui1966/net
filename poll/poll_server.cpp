@@ -60,6 +60,7 @@ int main()
 				{
 					printf("accept error.\n");
 					fflush(stdout);
+					close(listen_fd);
 					return -1;
 				}
 			}
@@ -136,5 +137,6 @@ int main()
 		}
 	}
 
+	close(listen_fd);
 	return 0;
 }

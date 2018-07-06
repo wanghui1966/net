@@ -13,3 +13,8 @@ select/bin/select_client
 poll/log/*log
 poll/bin/poll_server
 poll/bin/poll_client
+
+# thread
+thread/log/*log
+thread/bin/thread_server
+thread/bin/thread_client

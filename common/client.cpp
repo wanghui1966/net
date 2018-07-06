@@ -6,7 +6,7 @@ void client_func(int fd)
 	socklen_t client_addr_len = sizeof(client_addr);
 	getsockname(fd, (struct sockaddr*)&client_addr, &client_addr_len);
 	char *client_ip = inet_ntoa(client_addr.sin_addr);
-	short client_port = client_addr.sin_port;
+	in_port_t client_port = client_addr.sin_port;
 
 	char send_buf[MAX_BUF_LEN] = {0};
 	char recv_buf[MAX_BUF_LEN] = {0};
@@ -17,7 +17,7 @@ void client_func(int fd)
 		sleep(3);
 
 		memset(send_buf, 0, MAX_BUF_LEN);
-		snprintf(send_buf, MAX_BUF_LEN, "hello server(ip=%s, port=%d, pid=%d, index=%d).", client_ip, client_port, getpid(), index++);
+		snprintf(send_buf, MAX_BUF_LEN, "hello server(ip=%s, port=%u, pid=%d, index=%d).", client_ip, client_port, getpid(), index++);
 		write(fd, send_buf, strlen(send_buf));
 		printf("send:: %s\n", send_buf);
 
@@ -65,5 +65,6 @@ int main()
 	}
 	client_func(fd);
 
+	close(fd);
 	return 0;
 }
