@@ -7,7 +7,7 @@ int main()
 	if (listen_fd < 0)
 	{
 		printf("scoket error.\n");
-		return 1;
+		return -1;
 	}
 
 	// 服务器套接字
@@ -20,32 +20,38 @@ int main()
 	if (bind(listen_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0)
 	{
 		printf("bind error.\n");
-		return 1;
+		close(listen_fd);
+		return -1;
 	}
 
 	// 监听
 	if (listen(listen_fd, BACKLOG) < 0)
 	{
 		printf("listen error.\n");
+		close(listen_fd);
 		return -1;
 	}
 
-	int client_fd[SELECT_FD_SET_SIZE] = {0};
-	for (int i = 0; i < SELECT_FD_SET_SIZE; ++i)
+	int client_fd[MAX_FD_NUM] = {0};
+	for (int i = 0; i < MAX_FD_NUM; ++i)
 	{
 		client_fd[i] = -1;
 	}
-	fd_set all_set;
-	FD_ZERO(&all_set);
-	FD_SET(listen_fd, &all_set);
-	int max_fd = listen_fd;		// 待测试的最大描述符
-	int max_read_fd_index = -1;	// 最大的可读描述符索引
+	fd_set all_rset;
+	FD_ZERO(&all_rset);
+	FD_SET(listen_fd, &all_rset);
+	fd_set all_wset;
+	fd_set all_eset;
+	int max_fd = listen_fd;	// 待测试的最大描述符
+	int max_fd_index = -1;	// 最大的可读/可写描述符索引
 	char buf[MAX_BUF_LEN] = {0};
 
 	while (true)
 	{
-		fd_set rset = all_set;
-		int ready_fd = select(max_fd + 1, &rset, nullptr, nullptr, nullptr);
+		fd_set rset = all_rset;
+		fd_set wset = all_wset;
+		fd_set eset = all_eset;
+		int ready_fd = select(max_fd + 1, &rset, &wset, &eset, nullptr);
 
 		// 监听套接字消息
 		if (FD_ISSET(listen_fd, &rset))
@@ -55,16 +61,8 @@ int main()
 			int connect_fd = accept(listen_fd, (struct sockaddr*)&client_addr, &client_addr_len);
 			if (connect_fd < 0)
 			{
-				if (errno == EINTR)
-				{
-					continue;
-				}
-				else
-				{
-					printf("accept error.\n");
-					fflush(stdout);
-					return -1;
-				}
+				printf("accept error: continue.\n");
+				fflush(stdout);
 			}
 			else
 			{
@@ -72,7 +70,7 @@ int main()
 				fflush(stdout);
 
 				int i = 0;
-				for (; i < SELECT_FD_SET_SIZE; ++i)
+				for (; i < MAX_FD_NUM; ++i)
 				{
 					if (client_fd[i] == -1)
 					{
@@ -80,7 +78,7 @@ int main()
 						break;
 					}
 				}
-				if (i == SELECT_FD_SET_SIZE)
+				if (i == MAX_FD_NUM)
 				{
 					printf("too many connection.\n");
 					fflush(stdout);
@@ -88,14 +86,16 @@ int main()
 				}
 				else
 				{
-					FD_SET(connect_fd, &all_set);
+					FD_SET(connect_fd, &all_rset);
+					FD_SET(connect_fd, &all_wset);
+					FD_SET(connect_fd, &all_eset);
 					if (connect_fd > max_fd)
 					{
 						max_fd = connect_fd;
 					}
-					if (i > max_read_fd_index)
+					if (i > max_fd_index)
 					{
-						max_read_fd_index = i;
+						max_fd_index = i;
 					}
 				}
 			}
@@ -106,12 +106,14 @@ int main()
 		}
 
 		// 可读套接字消息
-		for (int i = 0; i <= max_read_fd_index; ++i)
+		for (int i = 0; i <= max_fd_index; ++i)
 		{
 			if (client_fd[i] < 0)
 			{
 				continue;
 			}
+
+			// 可读事件
 			if (FD_ISSET(client_fd[i], &rset))
 			{
 				memset(buf, 0, MAX_BUF_LEN);
@@ -124,22 +126,39 @@ int main()
 					snprintf(buf, MAX_BUF_LEN, "hello client.");
 					write(client_fd[i], buf, strlen(buf));
 				}
-				else if (len < 0 && errno == EINTR)
+				else if ((len == -1 && errno == EINTR) || errno == EAGAIN)
 				{
+					// 慢系统调用导致信号中断没有读到数据 或 非阻塞没有数据则返回EAGAIN
 					printf("recv error:: continue\n");
 				}
 				else
 				{
+					FD_CLR(client_fd[i], &all_rset);
+					FD_CLR(client_fd[i], &all_wset);
+					FD_CLR(client_fd[i], &all_eset);
 					close(client_fd[i]);
-					FD_CLR(client_fd[i], &all_set);
 					printf("connection closed:fd=%d\n", client_fd[i]);
 					client_fd[i] = -1;
 				}
 				fflush(stdout);
 			}
+
+			// 可写事件
+			if (FD_ISSET(client_fd[i], &wset))
+			{
+				;
+			}
+
+			// 错误事件
+			if (FD_ISSET(client_fd[i], &eset))
+			{
+				;
+			}
+
+			// 提前终止for循环
 			if (--ready_fd <= 0)
 			{
-				continue;
+				break;
 			}
 		}
 	}

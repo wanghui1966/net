@@ -35,8 +35,9 @@ void server_func(int fd)
 			fflush(stdout);
 			continue;
 		}
-		else if (len < 0 && errno == EINTR)
+		else if ((len == -1 && errno == EINTR) || errno == EAGAIN)
 		{
+			// 慢系统调用导致信号中断没有读到数据 或 非阻塞没有数据则返回EAGAIN
 			printf("recv error:: continue\n");
 			fflush(stdout);
 			continue;
@@ -55,7 +56,7 @@ int main()
 	if (listen_fd < 0)
 	{
 		printf("scoket error.\n");
-		return 1;
+		return -1;
 	}
 
 	// 服务器套接字
@@ -68,13 +69,15 @@ int main()
 	if (bind(listen_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0)
 	{
 		printf("bind error.\n");
-		return 1;
+		close(listen_fd);
+		return -1;
 	}
 
 	// 监听
 	if (listen(listen_fd, BACKLOG) < 0)
 	{
 		printf("listen error.\n");
+		close(listen_fd);
 		return -1;
 	}
 
@@ -87,15 +90,9 @@ int main()
 		int connect_fd = accept(listen_fd, (struct sockaddr*)&client_addr, &client_addr_len);
 		if (connect_fd < 0)
 		{
-			if (errno == EINTR)
-			{
-				continue;
-			}
-			else
-			{
-				printf("accept error.\n");
-				return -1;
-			}
+			printf("accept error: continue.\n");
+			fflush(stdout);
+			continue;
 		}
 		printf("accept:fd=%d.\n", connect_fd);
 		fflush(stdout);

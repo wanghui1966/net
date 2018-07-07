@@ -18,3 +18,8 @@ poll/bin/poll_client
 thread/log/*log
 thread/bin/thread_server
 thread/bin/thread_client
+
+# epoll
+epoll/log/*log
+epoll/bin/epoll_server
+epoll/bin/epoll_client
