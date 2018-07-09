@@ -1,3 +1,6 @@
+#ifndef HEADER_H
+#define HEADER_H
+
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -34,3 +37,5 @@ const int MAX_BUF_LEN = 1024;	// buf长度
 const int MAX_FD_NUM = 1024;
 
 extern int errno;
+
+#endif
