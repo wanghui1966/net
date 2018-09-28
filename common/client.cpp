@@ -6,7 +6,7 @@ void client_func(int fd)
 	socklen_t client_addr_len = sizeof(client_addr);
 	getsockname(fd, (struct sockaddr*)&client_addr, &client_addr_len);
 	char *client_ip = inet_ntoa(client_addr.sin_addr);
-	in_port_t client_port = client_addr.sin_port;
+	in_port_t client_port = ntohs(client_addr.sin_port);
 
 	char send_buf[MAX_BUF_LEN] = {0};
 	char recv_buf[MAX_BUF_LEN] = {0};
