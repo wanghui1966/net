@@ -30,7 +30,10 @@
 const char *SERVER_IP = "127.0.0.1";
 const in_port_t SERVER_PORT = 6666;
 
+// 客户端已经发起连接 且 还未被服务器accept 的连接总数量
+// 未完成连接队列(三次握手还未完成) + 已完成连接队列(三次握手已完成) 总和
 const int BACKLOG = 5;
+
 const int MAX_BUF_LEN = 1024;	// buf长度
 
 // select/poll/epoll最大描述符数量
