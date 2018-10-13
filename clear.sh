@@ -1,21 +1,9 @@
 #!/bin/sh
 
-cd fork
+cd tcp_test/
 ./clear.sh
 cd ..
 
-cd select
-./clear.sh
-cd ..
-
-cd poll
-./clear.sh
-cd ..
-
-cd thread
-./clear.sh
-cd ..
-
-cd epoll
+cd unix_test/
 ./clear.sh
 cd ..
